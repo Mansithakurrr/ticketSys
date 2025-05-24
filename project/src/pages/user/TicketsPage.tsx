@@ -35,7 +35,7 @@ const TicketsPage: React.FC = () => {
         </Link>
       </div>
       
-      <TicketList tickets={userTickets} />
+      <TicketList tickets={tickets} />
     </div>
   );
 };

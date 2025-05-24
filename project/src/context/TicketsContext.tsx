@@ -1,9 +1,17 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { Ticket, TicketStatus, Comment, Notification, Attachment } from '../types';
 import { tickets as mockTickets, notifications as mockNotifications } from '../data/mockData';
 import { useAuth } from './AuthContext';
 import { useAuditTrail } from './AuditTrailContext';
 import { AuditTrailEvent, AuditEventType } from '../types/audit';
+
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// Make sure VITE_API_BASE_URL=http://localhost:5000/api
+
+// const BASE_URL = 'http://localhost:5000/api';
+// console.log('at datacontect- BASE_URL', BASE_URL);
+
 
 // Extend AuditTrailEvent with new event types
 export interface ExtendedAuditTrailEvent extends AuditTrailEvent {
@@ -50,10 +58,32 @@ export const useTickets = (): TicketsContextType => {
 };
 
 export const TicketsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [tickets, setTickets] = useState<Ticket[]>(mockTickets);
+  // const [tickets, setTickets] = useState<Ticket[]>(mockTickets);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
   const { currentUser } = useAuth();
   const { logEvent, getTicketAuditTrail } = useExtendedAuditTrail();
+
+   // Fetch tickets from backend on mount
+   useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/tickets`);
+        const data = await res.json();
+        console.log('at datacontext - ticketsdata', data);
+  
+        if (res.ok) {
+          setTickets(data.tickets);
+        } else {
+          console.error('Failed to fetch tickets:', data.message);
+        }
+      } catch (err) {
+        console.error('Error fetching tickets:', err);
+      }
+    };
+  
+    fetchTickets();
+  }, []);
 
   const getTicketById = (id: string): Ticket | undefined => {
     return tickets.find(ticket => ticket.id === id);
@@ -67,49 +97,91 @@ export const TicketsProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return tickets.filter(ticket => ticket.status === status);
   };
 
-  const createTicket = async (ticketData: Partial<Ticket>): Promise<Ticket> => {
-    const newTicket: Ticket = {
-      id: `ticket-${Date.now()}`,
-      userId: currentUser?.id || '',
-      assignedTo: null,
-      type: ticketData.type || 'other',
-      priority: ticketData.priority || 'medium',
-      status: 'new',
-      subject: ticketData.subject || '',
-      description: ticketData.description || '',
-      attachments: ticketData.attachments || [],
-      comments: [],
-      statusHistory: [
+  // const createTicket = async (ticketData: Partial<Ticket>): Promise<Ticket> => {
+  //   const newTicket: Ticket = {
+  //     id: `ticket-${Date.now()}`,
+  //     userId: currentUser?.id || '',
+  //     assignedTo: null,
+  //     type: ticketData.type || 'other',
+  //     priority: ticketData.priority || 'medium',
+  //     status: 'new',
+  //     subject: ticketData.subject || '',
+  //     description: ticketData.description || '',
+  //     attachments: ticketData.attachments || [],
+  //     comments: [],
+  //     statusHistory: [
+  //       {
+  //         id: `status-change-1`,
+  //         ticketId: `ticket-${Date.now()}`,
+  //         fromStatus: 'new',
+  //         toStatus: 'new',
+  //         changedAt: new Date(),
+  //         changedBy: currentUser?.id || 'system',
+  //         comment: ''
+  //       }
+  //     ],
+  //     createdAt: new Date(),
+  //     updatedAt: new Date()
+  //   };
+
+  //   setTickets(prev => [...prev, newTicket]);
+
+  //   logEvent({
+  //     ticketId: newTicket.id,
+  //     eventType: 'ticket_created' as AuditEventType,
+  //     userId: currentUser?.id || 'system',
+  //     userName: currentUser?.name || 'System',
+  //     metadata: {
+  //       subject: newTicket.subject,
+  //       description: newTicket.description,
+  //       priority: newTicket.priority,
+  //       type: newTicket.type
+  //     }
+  //   });
+
+  //   return newTicket;
+  // };
+
+//
+  
+// ticket creation with api call 
+const createTicket = async (ticketData: Partial<Ticket>): Promise<Ticket> => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/tickets`, 
         {
-          id: `status-change-1`,
-          ticketId: `ticket-${Date.now()}`,
-          fromStatus: 'new',
-          toStatus: 'new',
-          changedAt: new Date(),
-          changedBy: currentUser?.id || 'system',
-          comment: ''
-        }
-      ],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...ticketData,
+          fullName: currentUser?.name || 'Anonymous',
+          email: currentUser?.email || 'anonymous@example.com',
+        }),
+      });
 
-    setTickets(prev => [...prev, newTicket]);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to create ticket');
 
-    logEvent({
-      ticketId: newTicket.id,
-      eventType: 'ticket_created' as AuditEventType,
-      userId: currentUser?.id || 'system',
-      userName: currentUser?.name || 'System',
-      metadata: {
-        subject: newTicket.subject,
-        description: newTicket.description,
-        priority: newTicket.priority,
-        type: newTicket.type
-      }
-    });
+      const newTicket: Ticket = data.ticket;
+      setTickets(prev => [newTicket, ...prev]);
 
-    return newTicket;
+      logEvent({
+        ticketId: newTicket.id,
+        eventType: 'ticket_created',
+        userId: currentUser?.id || 'system',
+        userName: currentUser?.name || 'System',
+        metadata: {
+          subject: newTicket.subject,
+          description: newTicket.description,
+          priority: newTicket.priority,
+          type: newTicket.type,
+        },
+      });
+
+      return newTicket;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   };
 
   const updateTicket = async (id: string, updates: Partial<Ticket> & { comment?: string }): Promise<Ticket> => {
