@@ -17,6 +17,7 @@ const TicketList: React.FC<TicketListProps> = ({
   tickets,
   className = '',
 }) => {
+  console.log('at ticketlist - tickets', tickets);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');

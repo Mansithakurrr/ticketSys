@@ -1,19 +1,28 @@
 const express = require('express');
 const router = express.Router();
-const { createTicket,getTickets, getTicketById, upload } = require('../controllers/ticketController');
-const { protect } = require('../middleware/authMiddleware');
+const {
+  createTicket,
+  getTickets,
+  getTicketById,
+  upload,
+} = require('../controllers/ticketController');
 
-// POST /api/tickets - Create a new ticket (with optional file uploads)
+
+router.get('/test', (req, res) => {
+  res.json({ message: 'Ticket API test working ✅' });
+});
+
 router.post(
   '/',
-  upload.array('attachments', 5), // 'attachments' is the field name for files, 5 is the max count
+  upload.array('attachments', 5),
   createTicket
 );
 
-// GET /api/tickets - Get all tickets
 router.get('/', getTickets);
 
-// GET /api/tickets/:id - Get a single ticket by ID
+
 router.get('/:id', getTicketById);
+
+// ------------------------
 
 module.exports = router;

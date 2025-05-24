@@ -1,7 +1,7 @@
 import React from 'react';
 import { Ticket } from '../../types';
 import { Card, CardBody } from '../ui/Card';
-import TicketStatusBadge from './TicketStatusBadge';
+// import TicketStatusBadge from './TicketStatusBadge';
 import TicketPriorityBadge from './TicketPriorityBadge';
 import TicketTypeBadge from './TicketTypeBadge';
 import { Clock, Paperclip, MessageSquare, User, GripVertical } from 'lucide-react';
@@ -54,10 +54,10 @@ const TicketCard: React.FC<TicketCardProps> = ({
         </div>
         <div className="flex flex-wrap justify-between gap-2 mb-2">
           <div className="flex gap-2">
-            <TicketTypeBadge type={ticket.type} />
-            <TicketPriorityBadge priority={ticket.priority} />
+            {/* <TicketTypeBadge type={ticket.type} /> */}
+            {/* <TicketPriorityBadge priority={ticket.priority} /> */}
           </div>
-          <TicketStatusBadge status={ticket.status} />
+          {/* <TicketStatusBadge status={ticket.status} /> */}
         </div>
         
         <Link to={`/tickets/${ticket.id}`} className="block">
@@ -84,7 +84,7 @@ const TicketCard: React.FC<TicketCardProps> = ({
               </div>
             )}
             
-            {ticket.comments.length > 0 && (
+            {ticket.comments?.length > 0 && (
               <div className="flex items-center">
                 <MessageSquare className="h-3 w-3 mr-1" />
                 <span>{ticket.comments.length}</span>

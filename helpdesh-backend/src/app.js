@@ -14,6 +14,11 @@ app.use('/uploads', express.static('uploads'));
 // Routes
 app.use('/api/tickets', ticketRoutes);
 
+// Test route
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Server is running ✅' });
+});
+
 // Basic error handling middleware (you can expand this)
 app.use((err, req, res, next) => {
   console.error(err.stack);
