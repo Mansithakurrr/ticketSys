@@ -147,7 +147,7 @@ export const TicketsProvider: React.FC<{ children: React.ReactNode }> = ({ child
 // ticket creation with api call 
 const createTicket = async (ticketData: Partial<Ticket>): Promise<Ticket> => {
     try {
-      const res = await fetch(`${BASE_URL}/api/tickets`, 
+      const res = await fetch(`${BASE_URL}/tickets`, 
         {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

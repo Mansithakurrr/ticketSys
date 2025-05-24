@@ -82,6 +82,10 @@ const createTicket = async (req, res, next) => {
   }
 };
 
+
+
+
+
 // @desc    Get all tickets (auth skipped)
 // @route   GET /api/tickets
 const getTickets = async (req, res, next) => {
