@@ -61,22 +61,13 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className="h-8 w-8 text-blue-600"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
+               <img
+                src="bpllogo.png" 
+                alt="Big Pluto Logo"
+                className="h-8 w-8"
+              />
               <span className="ml-2 text-xl font-bold text-gray-800">
-                HelpDesk
+                Big Pluto
               </span>
             </Link>
             
